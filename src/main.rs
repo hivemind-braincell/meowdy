@@ -75,7 +75,11 @@ fn main() {
     .add_startup_system(set_up_camera)
     .add_startup_system(set_up_physics)
     .add_system_set(SystemSet::on_enter(GameState::MainMenu).with_system(scene::menu::setup))
-    .add_system_set(SystemSet::on_update(GameState::MainMenu).with_system(scene::menu::click_item))
+    .add_system_set(
+        SystemSet::on_update(GameState::MainMenu)
+            .with_system(scene::menu::click_item)
+            .with_system(animation::animate),
+    )
     .add_system_set(SystemSet::on_exit(GameState::MainMenu).with_system(scene::menu::teardown))
     .add_system_set(
         SystemSet::on_enter(GameState::Outside)
