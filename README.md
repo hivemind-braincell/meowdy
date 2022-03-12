@@ -7,6 +7,8 @@ Meowdy! That's the name of this western-style cat-based RPG. You play as Claws E
 
 This game was built by three people in 24 hours as part of the 2022 Wackathon. Two of the three writers had no previous experience in Rust.
 
+This game uses the Rust game engine "Bevy", and illustrates that not all games have to be written in more traditional languages (like C++ or C#). Rust is a new and emerging language with a great community and a focus on safety, speed and ease of use.
+
 ## Installation
 
 ### Using `cargo`
