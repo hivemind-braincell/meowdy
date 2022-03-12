@@ -60,6 +60,10 @@ jobs:
           ~/.cargo/git
           target
         key: lint-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+    - name: Install alsa
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev
+    - name: Install udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libudev-dev
     - name: Clippy
       uses: actions-rs/clippy-check@v1
       with:
@@ -85,6 +89,10 @@ jobs:
           ~/.cargo/git
           target
         key: test-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+    - name: Install alsa
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev
+    - name: Install udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libudev-dev
     - name: Test
       uses: actions-rs/cargo@v1
       with:

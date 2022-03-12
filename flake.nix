@@ -56,7 +56,18 @@
           # because native build inputs are added to $PATH in the order they're listed here.
           nightly-rustfmt
           rust-toolchain
+
+          pkgconfig
         ] ++ format-pkgs;
+        buildInputs = with pkgs; [
+          dbus
+          udev alsaLib vulkan-loader
+          xlibsWrapper xorg.libXcursor xorg.libXrandr xorg.libXi
+        ];
+        shellHook = with pkgs; ''export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${lib.makeLibraryPath [
+          dbus
+          udev alsaLib vulkan-loader
+        ]}"'';
       };
 
       checks = {
