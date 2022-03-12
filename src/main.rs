@@ -4,13 +4,15 @@ use animation::Animation;
 use assets::Sprites;
 use bevy::{log::LogSettings, prelude::*};
 use bevy_asset_loader::AssetLoader;
-use bevy_inspector_egui::WorldInspectorPlugin;
+use bevy_inspector_egui::{InspectorPlugin, RegisterInspectable, WorldInspectorPlugin};
 use bevy_rapier2d::prelude::*;
 use clap::Parser;
+use control::Facing;
 use tracing::instrument;
 
 mod animation;
 mod assets;
+mod control;
 mod player;
 
 #[derive(Parser, Debug)]
@@ -28,6 +30,15 @@ struct Args {
 enum GameState {
     AssetLoading,
     InGame,
+}
+
+#[derive(SystemLabel, Clone, Debug, PartialEq, Eq, Hash)]
+enum Label {
+    ReadInput,
+    ApplyInput,
+    Move,
+    PrepareAnimation,
+    Animate,
 }
 
 fn main() {
@@ -57,12 +68,40 @@ fn main() {
     .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
     .add_state(GameState::AssetLoading)
     .add_startup_system(camera_setup)
-    .add_system_set(SystemSet::on_enter(GameState::InGame).with_system(player::spawn_player))
+    .add_system_set(
+        SystemSet::on_enter(GameState::InGame)
+            .with_system(player::spawn_player)
+            .before(Label::ReadInput),
+    )
     .add_system_set(
         SystemSet::on_update(GameState::InGame)
-            .with_system(player::move_player)
+            .with_system(control::read_control_input)
+            .label(Label::ReadInput),
+    )
+    .add_system_set(
+        SystemSet::on_update(GameState::InGame)
+            .after(Label::ReadInput)
+            .with_system(control::update_facing)
+            .label(Label::ApplyInput),
+    )
+    .add_system_set(
+        SystemSet::on_update(GameState::InGame)
+            .after(Label::ReadInput)
+            .with_system(control::move_controlled)
+            .label(Label::Move),
+    )
+    .add_system_set(
+        SystemSet::on_update(GameState::InGame)
+            .after(Label::ApplyInput)
+            .with_system(animation::start_stop_player_animation)
             .with_system(animation::update_player_animation)
-            .with_system(animation::animate_player),
+            .label(Label::PrepareAnimation),
+    )
+    .add_system_set(
+        SystemSet::on_update(GameState::InGame)
+            .after(Label::PrepareAnimation)
+            .with_system(animation::animate)
+            .label(Label::Animate),
     )
     .register_type::<Animation>();
 
