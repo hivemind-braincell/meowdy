@@ -2,6 +2,11 @@
 
 [![CI]][workflow]
 
+## Vision and Design
+Meowdy! That's the name of this western-style cat-based RPG. You play as Claws Eastwood as you try to escape your backwater country hometown and find your fortune out West. Do odd-jobs and favours around town to earn money, you'll need it to pay for a ride outta here! 
+
+This game was built by three people in 24 hours as part of the 2022 Wackathon. Two of the three writers had no previous experience in Rust.
+
 ## Installation
 
 ### Using `cargo`
