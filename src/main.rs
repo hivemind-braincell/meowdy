@@ -1,13 +1,14 @@
 //! meowdy
 
+#![allow(clippy::type_complexity)]
+
 use animation::Animation;
 use assets::Sprites;
 use bevy::{log::LogSettings, prelude::*};
 use bevy_asset_loader::AssetLoader;
-use bevy_inspector_egui::{InspectorPlugin, RegisterInspectable, WorldInspectorPlugin};
+use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_rapier2d::prelude::*;
 use clap::Parser;
-use control::Facing;
 use tracing::instrument;
 
 mod animation;
