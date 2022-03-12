@@ -62,11 +62,11 @@
         buildInputs = with pkgs; [
           dbus
           udev alsaLib vulkan-loader
-          xlibsWrapper xorg.libXcursor xorg.libXrandr xorg.libXi
+          xlibsWrapper xorg.libXcursor xorg.libXrandr xorg.libXi xorg.libxcb
         ];
         shellHook = with pkgs; ''export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:${lib.makeLibraryPath [
           dbus
-          udev alsaLib vulkan-loader
+          udev alsaLib vulkan-loader xorg.libxcb
         ]}"'';
       };
 
