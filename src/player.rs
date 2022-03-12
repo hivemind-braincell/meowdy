@@ -44,12 +44,13 @@ pub fn spawn_player(
         })
         .insert_bundle(SpriteSheetBundle {
             texture_atlas: texture_atlas_handle,
+            transform: Transform::from_translation(Vec3::new(0., -12., 2.)),
             ..Default::default()
         })
         .insert_bundle(RigidBodyBundle {
             body_type: RigidBodyType::Dynamic.into(),
             mass_properties: RigidBodyMassPropsFlags::ROTATION_LOCKED.into(),
-            position: Vec2::new(0., 0.).into(),
+            position: Vec2::new(0., -12.).into(),
             ..Default::default()
         })
         .insert(RigidBodyPositionSync::Discrete)

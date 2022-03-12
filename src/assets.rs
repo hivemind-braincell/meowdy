@@ -10,3 +10,9 @@ pub struct Sprites {
     #[asset(path = "sprites/groundwide.png")]
     pub groundwide: Handle<Image>,
 }
+
+#[derive(AssetCollection)]
+pub struct Images {
+    #[asset(path = "images/buildings.png")]
+    pub buildings: Handle<Image>,
+}

@@ -3,7 +3,7 @@
 #![allow(clippy::type_complexity)]
 
 use animation::Animation;
-use assets::Sprites;
+use assets::{Images, Sprites};
 use bevy::{log::LogSettings, prelude::*};
 use bevy_asset_loader::AssetLoader;
 use bevy_inspector_egui::WorldInspectorPlugin;
@@ -51,15 +51,17 @@ fn main() {
     AssetLoader::new(GameState::AssetLoading)
         .continue_to_state(GameState::InGame)
         .with_collection::<Sprites>()
+        .with_collection::<Images>()
         .build(&mut app);
 
     let log_level = if args.verbose { "debug" } else { "info" };
     let filter = format!("meowdy={log_level},wgpu=error,bevy_render=info");
 
     app.insert_resource(WindowDescriptor {
-        width: 1440.,
-        height: 576.,
         title: "Meowdy!".into(),
+        width: 1440.,
+        height: 1080.,
+        resizable: false,
         ..Default::default()
     })
     .insert_resource(LogSettings {
