@@ -4,6 +4,7 @@ use assets::Sprites;
 use bevy::{log::LogSettings, prelude::*};
 use bevy_asset_loader::AssetLoader;
 use bevy_inspector_egui::WorldInspectorPlugin;
+use bevy_rapier2d::prelude::*;
 use clap::Parser;
 use tracing::instrument;
 
@@ -51,9 +52,11 @@ fn main() {
         ..Default::default()
     })
     .add_plugins(DefaultPlugins)
+    .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
     .add_state(GameState::AssetLoading)
     .add_startup_system(camera_setup)
-    .add_system_set(SystemSet::on_enter(GameState::InGame).with_system(player::spawn_player));
+    .add_system_set(SystemSet::on_enter(GameState::InGame).with_system(player::spawn_player))
+    .add_system_set(SystemSet::on_update(GameState::InGame).with_system(player::move_player));
 
     if args.inspector {
         info!("adding world inspector plugin");
