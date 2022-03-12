@@ -15,6 +15,7 @@ mod animation;
 mod assets;
 mod control;
 mod player;
+mod scene;
 
 #[derive(Parser, Debug)]
 #[clap(version, about)]
@@ -56,8 +57,8 @@ fn main() {
     let filter = format!("meowdy={log_level},wgpu=error,bevy_render=info");
 
     app.insert_resource(WindowDescriptor {
-        width: 1280.,
-        height: 720.,
+        width: 1440.,
+        height: 576.,
         title: "Meowdy!".into(),
         ..Default::default()
     })
@@ -72,6 +73,7 @@ fn main() {
     .add_system_set(
         SystemSet::on_enter(GameState::InGame)
             .with_system(player::spawn_player)
+            .with_system(scene::outside::setup)
             .before(Label::ReadInput),
     )
     .add_system_set(

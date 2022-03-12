@@ -7,4 +7,6 @@ use bevy_asset_loader::AssetCollection;
 pub struct Sprites {
     #[asset(path = "sprites/Player.png")]
     pub player: Handle<Image>,
+    #[asset(path = "sprites/groundwide.png")]
+    pub groundwide: Handle<Image>,
 }
