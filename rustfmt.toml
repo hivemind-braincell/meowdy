@@ -1,0 +1,7 @@
+edition = "2021"
+# Nightly rustfmt must be used for formatting, e.g. cargo +nightly fmt
+unstable_features = true
+
+format_strings = true
+group_imports = "StdExternalCrate"
+imports_granularity = "Crate"
