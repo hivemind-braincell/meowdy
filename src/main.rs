@@ -10,7 +10,7 @@ use tracing::instrument;
 struct Args {
     /// Enable the debug inspector
     #[clap(short, long)]
-    debug: bool,
+    inspector: bool,
     /// Output verbose logs
     #[clap(short, long)]
     verbose: bool,
@@ -37,8 +37,8 @@ fn main() {
     .add_plugins(DefaultPlugins)
     .add_startup_system(camera_setup);
 
-    if args.debug {
-        info!(debug = %args.debug, "adding debug inspector plugin");
+    if args.inspector {
+        info!("adding world inspector plugin");
         app.add_plugin(WorldInspectorPlugin::new());
     }
 
