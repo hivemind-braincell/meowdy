@@ -1987,6 +1987,7 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "clap",
+ "tracing",
 ]
 
 [[package]]
