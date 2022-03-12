@@ -14,7 +14,6 @@ use tracing::instrument;
 mod animation;
 mod assets;
 mod control;
-mod player;
 mod scene;
 
 #[derive(Parser, Debug)]
@@ -33,6 +32,7 @@ pub enum GameState {
     AssetLoading,
     MainMenu,
     Outside,
+    PostOffice,
 }
 
 #[derive(SystemLabel, Clone, Debug, PartialEq, Eq, Hash)]
@@ -83,7 +83,6 @@ fn main() {
     .add_system_set(SystemSet::on_exit(GameState::MainMenu).with_system(scene::menu::teardown))
     .add_system_set(
         SystemSet::on_enter(GameState::Outside)
-            .with_system(player::spawn_player)
             .with_system(scene::outside::setup)
             .before(Label::ReadInput),
     )
@@ -117,6 +116,7 @@ fn main() {
             .with_system(animation::animate)
             .label(Label::Animate),
     )
+    .add_system_set(SystemSet::on_exit(GameState::Outside).with_system(scene::outside::teardown))
     .register_type::<Animation>();
 
     if args.inspector {

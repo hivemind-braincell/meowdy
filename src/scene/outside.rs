@@ -4,7 +4,18 @@ use bevy_rapier2d::prelude::*;
 use crate::{
     animation::Animation,
     assets::{Images, Sprites},
+    control::{Controlled, Facing, Moves},
 };
+
+#[derive(Component, Reflect, Clone, Debug, Default)]
+#[reflect(Component)]
+pub struct Player;
+
+#[derive(Component)]
+pub struct Scenery;
+
+#[derive(Component)]
+pub struct Collider;
 
 pub fn setup(
     mut commands: Commands,
@@ -15,6 +26,53 @@ pub fn setup(
 ) {
     let scale = rapier_config.scale;
 
+    let player_handle = sprites.player.clone();
+    let player_atlas =
+        TextureAtlas::from_grid_with_padding(player_handle, Vec2::new(36., 36.), 4, 2, Vec2::ONE);
+    let player_atlas_handle = texture_atlases.add(player_atlas);
+
+    commands
+        .spawn()
+        .insert(Name::new("Player"))
+        .insert(Player)
+        .insert(Moves { speed: 2.5 })
+        .insert(Controlled::default())
+        .insert(Facing::Right)
+        .insert(Animation {
+            timer: Timer::from_seconds(0.1, true),
+            current_frame: 0,
+            start_frame: 0,
+            frames: 1,
+        })
+        .insert_bundle(SpriteSheetBundle {
+            texture_atlas: player_atlas_handle,
+            transform: Transform::from_translation(Vec3::new(0., 0., 2.)),
+            ..Default::default()
+        })
+        .insert_bundle(RigidBodyBundle {
+            body_type: RigidBodyType::Dynamic.into(),
+            mass_properties: RigidBodyMassPropsFlags::ROTATION_LOCKED.into(),
+            position: Vec2::new(0., -42. / scale).into(),
+            ..Default::default()
+        })
+        .insert(RigidBodyPositionSync::Discrete)
+        .with_children(|parent| {
+            parent
+                .spawn()
+                .insert_bundle(ColliderBundle {
+                    shape: ColliderShape::cuboid(0.35, 0.5).into(),
+                    position: Vec2::new(0., 0.).into(),
+                    material: ColliderMaterial {
+                        friction: 0.,
+                        restitution: 0.,
+                        ..Default::default()
+                    }
+                    .into(),
+                    ..Default::default()
+                })
+                .insert(ColliderDebugRender::default());
+        });
+
     commands
         .spawn()
         .insert_bundle(SpriteBundle {
@@ -22,22 +80,18 @@ pub fn setup(
             texture: images.buildings.clone(),
             ..Default::default()
         })
-        .insert(Name::new("Background"));
+        .insert(Name::new("Background"))
+        .insert(Scenery);
 
-    let texture_handle = sprites.groundwide.clone();
-    let texture_atlas = TextureAtlas::from_grid_with_padding(
-        texture_handle,
-        Vec2::new(360., 144.),
-        3,
-        1,
-        Vec2::ONE,
-    );
-    let texture_atlas_handle = texture_atlases.add(texture_atlas);
+    let ground_andle = sprites.groundwide.clone();
+    let ground_atlas =
+        TextureAtlas::from_grid_with_padding(ground_andle, Vec2::new(360., 144.), 3, 1, Vec2::ONE);
+    let ground_atlas_handle = texture_atlases.add(ground_atlas);
 
     commands
         .spawn()
         .insert_bundle(SpriteSheetBundle {
-            texture_atlas: texture_atlas_handle,
+            texture_atlas: ground_atlas_handle,
             transform: Transform::from_translation(Vec3::new(0., -63., 1.)),
             ..Default::default()
         })
@@ -47,7 +101,8 @@ pub fn setup(
             start_frame: 0,
             frames: 3,
         })
-        .insert(Name::new("Ground"));
+        .insert(Name::new("Ground"))
+        .insert(Scenery);
 
     commands
         .spawn()
@@ -68,7 +123,8 @@ pub fn setup(
         })
         .insert(RigidBodyPositionSync::Discrete)
         .insert(ColliderDebugRender::default())
-        .insert(Name::new("Top Collider"));
+        .insert(Name::new("Top Collider"))
+        .insert(Collider);
 
     commands
         .spawn()
@@ -89,7 +145,8 @@ pub fn setup(
         })
         .insert(RigidBodyPositionSync::Discrete)
         .insert(ColliderDebugRender::default())
-        .insert(Name::new("Bottom Collider"));
+        .insert(Name::new("Bottom Collider"))
+        .insert(Collider);
 
     commands
         .spawn()
@@ -110,7 +167,8 @@ pub fn setup(
         })
         .insert(RigidBodyPositionSync::Discrete)
         .insert(ColliderDebugRender::default())
-        .insert(Name::new("Left Collider"));
+        .insert(Name::new("Left Collider"))
+        .insert(Collider);
 
     commands
         .spawn()
@@ -131,5 +189,18 @@ pub fn setup(
         })
         .insert(RigidBodyPositionSync::Discrete)
         .insert(ColliderDebugRender::default())
-        .insert(Name::new("Right Collider"));
+        .insert(Name::new("Right Collider"))
+        .insert(Collider);
+}
+
+pub fn teardown(
+    mut commands: Commands,
+    player: Query<Entity, With<Player>>,
+    scenery: Query<Entity, With<Scenery>>,
+    colliders: Query<Entity, With<Collider>>,
+) {
+    info!("tearing down outside scene");
+    player.for_each(|entity| commands.entity(entity).despawn_recursive());
+    scenery.for_each(|entity| commands.entity(entity).despawn_recursive());
+    colliders.for_each(|entity| commands.entity(entity).despawn_recursive());
 }

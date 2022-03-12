@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     control::{Controlled, Facing},
-    player::Player,
+    scene::outside::Player,
 };
 
 #[derive(Component, Reflect, Clone, Debug, Default)]
