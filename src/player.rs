@@ -15,7 +15,7 @@ pub struct Player {
 impl Default for Player {
     fn default() -> Self {
         Self {
-            speed: 3.5,
+            speed: 5.,
             sprint_multiplier: 1.5,
         }
     }
@@ -35,7 +35,7 @@ pub fn spawn_player(
     let player = Player::default();
 
     rapier_config.gravity = Vector::zeros();
-    rapier_config.scale = 5.;
+    rapier_config.scale = 4.;
 
     commands
         .spawn()
