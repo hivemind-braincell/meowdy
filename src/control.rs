@@ -69,10 +69,7 @@ pub fn update_facing(mut query: Query<(&mut Facing, &Controlled)>) {
     }
 }
 
-pub fn move_controlled(
-    mut query: Query<(&mut RigidBodyVelocityComponent, &Controlled, &Moves)>,
-    rapier_config: Res<RapierConfiguration>,
-) {
+pub fn move_controlled(mut query: Query<(&mut RigidBodyVelocityComponent, &Controlled, &Moves)>) {
     for (mut rigid_body, controlled, moves) in query.iter_mut() {
         let up = controlled.inputs.contains(&ControlInput::Up);
         let left = controlled.inputs.contains(&ControlInput::Left);
@@ -96,7 +93,7 @@ pub fn move_controlled(
 
         if !(x_axis == 0 && y_axis == 0) {
             rigid_body.linvel.normalize_mut();
-            rigid_body.linvel *= moves.speed * rapier_config.scale;
+            rigid_body.linvel *= moves.speed;
         }
     }
 }

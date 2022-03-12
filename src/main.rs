@@ -72,7 +72,8 @@ fn main() {
     .add_plugins(DefaultPlugins)
     .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
     .add_state(GameState::AssetLoading)
-    .add_startup_system(camera_setup)
+    .add_startup_system(set_up_camera)
+    .add_startup_system(set_up_physics)
     .add_system_set(SystemSet::on_enter(GameState::MainMenu).with_system(scene::menu::setup))
     .add_system_set(SystemSet::on_update(GameState::MainMenu).with_system(scene::menu::click_item))
     .add_system_set(SystemSet::on_exit(GameState::MainMenu).with_system(scene::menu::teardown))
@@ -117,17 +118,30 @@ fn main() {
     if args.inspector {
         info!("adding world inspector plugin");
         app.add_plugin(WorldInspectorPlugin::new());
+
+        info!("adding rapier render plugin");
+        app.add_plugin(RapierRenderPlugin);
     }
 
     app.run();
 }
 
 #[instrument(skip(commands))]
-fn camera_setup(mut commands: Commands) {
-    debug!("spawning orthographic camera bundle");
+fn set_up_camera(mut commands: Commands) {
+    info!("spawning orthographic camera bundle");
 
     let mut camera_bundle = OrthographicCameraBundle::new_2d();
     camera_bundle.orthographic_projection.scale = 1. / 4.;
 
-    commands.spawn_bundle(camera_bundle);
+    commands
+        .spawn_bundle(camera_bundle)
+        .insert(Name::new("Camera"));
+}
+
+#[instrument(skip(rapier_config))]
+fn set_up_physics(mut rapier_config: ResMut<RapierConfiguration>) {
+    rapier_config.gravity = Vector::zeros();
+    rapier_config.scale = 36.;
+
+    info!(gravity = ?rapier_config.gravity, scale = ?rapier_config.scale, "configured rapier");
 }

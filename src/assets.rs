@@ -9,6 +9,8 @@ pub struct Sprites {
     pub player: Handle<Image>,
     #[asset(path = "sprites/groundwide.png")]
     pub groundwide: Handle<Image>,
+    #[asset(path = "sprites/mainmenuscreen.png")]
+    pub mainmenuscreen: Handle<Image>,
 }
 
 #[derive(AssetCollection)]
