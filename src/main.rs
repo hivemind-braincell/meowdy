@@ -1,5 +1,6 @@
 //! meowdy
 
+use animation::Animation;
 use assets::Sprites;
 use bevy::{log::LogSettings, prelude::*};
 use bevy_asset_loader::AssetLoader;
@@ -8,6 +9,7 @@ use bevy_rapier2d::prelude::*;
 use clap::Parser;
 use tracing::instrument;
 
+mod animation;
 mod assets;
 mod player;
 
@@ -56,7 +58,13 @@ fn main() {
     .add_state(GameState::AssetLoading)
     .add_startup_system(camera_setup)
     .add_system_set(SystemSet::on_enter(GameState::InGame).with_system(player::spawn_player))
-    .add_system_set(SystemSet::on_update(GameState::InGame).with_system(player::move_player));
+    .add_system_set(
+        SystemSet::on_update(GameState::InGame)
+            .with_system(player::move_player)
+            .with_system(animation::update_player_animation)
+            .with_system(animation::animate_player),
+    )
+    .register_type::<Animation>();
 
     if args.inspector {
         info!("adding world inspector plugin");
