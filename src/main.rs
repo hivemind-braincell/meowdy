@@ -29,9 +29,10 @@ struct Args {
 }
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
-enum GameState {
+pub enum GameState {
     AssetLoading,
-    InGame,
+    MainMenu,
+    Outside,
 }
 
 #[derive(SystemLabel, Clone, Debug, PartialEq, Eq, Hash)]
@@ -49,7 +50,7 @@ fn main() {
     let mut app = App::new();
 
     AssetLoader::new(GameState::AssetLoading)
-        .continue_to_state(GameState::InGame)
+        .continue_to_state(GameState::MainMenu)
         .with_collection::<Sprites>()
         .with_collection::<Images>()
         .build(&mut app);
@@ -72,38 +73,41 @@ fn main() {
     .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
     .add_state(GameState::AssetLoading)
     .add_startup_system(camera_setup)
+    .add_system_set(SystemSet::on_enter(GameState::MainMenu).with_system(scene::menu::setup))
+    .add_system_set(SystemSet::on_update(GameState::MainMenu).with_system(scene::menu::click_item))
+    .add_system_set(SystemSet::on_exit(GameState::MainMenu).with_system(scene::menu::teardown))
     .add_system_set(
-        SystemSet::on_enter(GameState::InGame)
+        SystemSet::on_enter(GameState::Outside)
             .with_system(player::spawn_player)
             .with_system(scene::outside::setup)
             .before(Label::ReadInput),
     )
     .add_system_set(
-        SystemSet::on_update(GameState::InGame)
+        SystemSet::on_update(GameState::Outside)
             .with_system(control::read_control_input)
             .label(Label::ReadInput),
     )
     .add_system_set(
-        SystemSet::on_update(GameState::InGame)
+        SystemSet::on_update(GameState::Outside)
             .after(Label::ReadInput)
             .with_system(control::update_facing)
             .label(Label::ApplyInput),
     )
     .add_system_set(
-        SystemSet::on_update(GameState::InGame)
+        SystemSet::on_update(GameState::Outside)
             .after(Label::ReadInput)
             .with_system(control::move_controlled)
             .label(Label::Move),
     )
     .add_system_set(
-        SystemSet::on_update(GameState::InGame)
+        SystemSet::on_update(GameState::Outside)
             .after(Label::ApplyInput)
             .with_system(animation::start_stop_player_animation)
             .with_system(animation::update_player_animation)
             .label(Label::PrepareAnimation),
     )
     .add_system_set(
-        SystemSet::on_update(GameState::InGame)
+        SystemSet::on_update(GameState::Outside)
             .after(Label::PrepareAnimation)
             .with_system(animation::animate)
             .label(Label::Animate),
