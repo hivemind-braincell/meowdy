@@ -4,7 +4,7 @@
 
 use animation::Animation;
 use assets::{Images, Sprites};
-use bevy::{log::LogSettings, prelude::*};
+use bevy::{core::FixedTimestep, log::LogSettings, prelude::*};
 use bevy_asset_loader::AssetLoader;
 use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_rapier2d::prelude::*;
@@ -89,6 +89,7 @@ fn main() {
     .add_system_set(
         SystemSet::on_update(GameState::Outside)
             .with_system(control::read_control_input)
+            .with_system(scene::outside::scene_transition)
             .label(Label::ReadInput),
     )
     .add_system_set(
@@ -117,6 +118,39 @@ fn main() {
             .label(Label::Animate),
     )
     .add_system_set(SystemSet::on_exit(GameState::Outside).with_system(scene::outside::teardown))
+    .add_system_set(
+        SystemSet::on_enter(GameState::PostOffice)
+            .with_system(scene::post_office::setup)
+            .before(Label::ReadInput),
+    )
+    .add_system_set(
+        SystemSet::on_update(GameState::PostOffice)
+            .with_system(control::read_control_input)
+            .label(Label::ReadInput),
+    )
+    .add_system_set(
+        SystemSet::on_update(GameState::PostOffice)
+            .after(Label::ReadInput)
+            .with_run_criteria(FixedTimestep::step(0.150))
+            .with_system(scene::post_office::update_head_direction)
+            .label(Label::ApplyInput),
+    )
+    .add_system_set(
+        SystemSet::on_update(GameState::PostOffice)
+            .after(Label::ApplyInput)
+            .with_run_criteria(FixedTimestep::step(0.150))
+            .with_system(scene::post_office::move_snake)
+            .label(Label::Move),
+    )
+    .add_system_set(
+        SystemSet::on_update(GameState::PostOffice)
+            .after(Label::Move)
+            .with_system(scene::post_office::position_translation)
+            .label(Label::PrepareAnimation),
+    )
+    .add_system_set(
+        SystemSet::on_exit(GameState::PostOffice).with_system(scene::post_office::teardown),
+    )
     .register_type::<Animation>();
 
     if args.inspector {

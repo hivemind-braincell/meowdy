@@ -4,8 +4,6 @@ use bevy::{prelude::*, utils::HashSet};
 use bevy_rapier2d::prelude::*;
 use tracing::instrument;
 
-use crate::GameState;
-
 #[derive(Component, Clone, Debug)]
 pub struct Moves {
     pub speed: f32,
@@ -31,11 +29,7 @@ pub enum Facing {
 }
 
 #[instrument(skip(query, keyboard_input))]
-pub fn read_control_input(
-    mut query: Query<&mut Controlled>,
-    keyboard_input: Res<Input<KeyCode>>,
-    mut app_state: ResMut<State<GameState>>,
-) {
+pub fn read_control_input(mut query: Query<&mut Controlled>, keyboard_input: Res<Input<KeyCode>>) {
     for mut controlled in query.iter_mut() {
         controlled.inputs.clear();
 
@@ -50,10 +44,6 @@ pub fn read_control_input(
         }
         if keyboard_input.pressed(KeyCode::D) {
             controlled.inputs.insert(ControlInput::Right);
-        }
-
-        if keyboard_input.pressed(KeyCode::Space) {
-            app_state.set(GameState::PostOffice).unwrap();
         }
     }
 }

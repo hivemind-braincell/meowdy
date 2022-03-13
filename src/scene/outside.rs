@@ -1,10 +1,12 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use tracing::instrument;
 
 use crate::{
     animation::Animation,
     assets::{Images, Sprites},
     control::{Controlled, Facing, Moves},
+    GameState,
 };
 
 #[derive(Component, Reflect, Clone, Debug, Default)]
@@ -17,6 +19,7 @@ pub struct Scenery;
 #[derive(Component)]
 pub struct Collider;
 
+#[instrument(skip(commands, sprites, images, texture_atlases, rapier_config))]
 pub fn setup(
     mut commands: Commands,
     sprites: Res<Sprites>,
@@ -24,6 +27,8 @@ pub fn setup(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     rapier_config: Res<RapierConfiguration>,
 ) {
+    info!("setting up outside scene");
+
     let scale = rapier_config.scale;
 
     let player_handle = sprites.player.clone();
@@ -193,6 +198,18 @@ pub fn setup(
         .insert(Collider);
 }
 
+#[instrument(skip(keyboard_input, app_state))]
+pub fn scene_transition(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut app_state: ResMut<State<GameState>>,
+) {
+    if keyboard_input.pressed(KeyCode::Space) {
+        info!("transitioning to post office scene");
+        app_state.set(GameState::PostOffice).unwrap();
+    }
+}
+
+#[instrument(skip(commands, player, scenery, colliders))]
 pub fn teardown(
     mut commands: Commands,
     player: Query<Entity, With<Player>>,

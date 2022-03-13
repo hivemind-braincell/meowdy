@@ -1,10 +1,12 @@
 use bevy::prelude::*;
+use tracing::instrument;
 
 use crate::{animation::Animation, assets::Sprites, GameState};
 
 #[derive(Component)]
 pub struct MainMenu;
 
+#[instrument(skip(commands, sprites, texture_atlases))]
 pub fn setup(
     mut commands: Commands,
     sprites: Res<Sprites>,
@@ -87,6 +89,7 @@ pub fn click_item(query: Query<&Interaction>, mut app_state: ResMut<State<GameSt
     }
 }
 
+#[instrument(skip(commands, query))]
 pub fn teardown(mut commands: Commands, query: Query<Entity, With<MainMenu>>) {
     info!("tearing down main menu");
     query.for_each(|entity| commands.entity(entity).despawn_recursive());
