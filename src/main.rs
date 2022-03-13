@@ -34,6 +34,7 @@ pub enum GameState {
     MainMenu,
     Outside,
     PostOffice,
+    End,
 }
 
 #[derive(SystemLabel, Clone, Debug, PartialEq, Eq, Hash)]
@@ -163,6 +164,8 @@ fn main() {
             )
             .with_system(scene::post_office::game_over.after(Label::SpawnFood)),
     )
+    .add_system_set(SystemSet::on_enter(GameState::End).with_system(scene::end::setup))
+    .add_system_set(SystemSet::on_update(GameState::End).with_system(scene::end::switch_end_scene))
     .add_system_set_to_stage(
         CoreStage::PostUpdate,
         SystemSet::new().with_system(scene::post_office::position_translation),
@@ -180,6 +183,9 @@ fn main() {
     app.run();
 }
 
+#[derive(Component)]
+pub struct Camera;
+
 #[instrument(skip(commands))]
 fn set_up_camera(mut commands: Commands) {
     info!("spawning orthographic camera bundle");
@@ -189,7 +195,8 @@ fn set_up_camera(mut commands: Commands) {
 
     commands
         .spawn_bundle(camera_bundle)
-        .insert(Name::new("Camera"));
+        .insert(Name::new("Camera"))
+        .insert(Camera);
 }
 
 #[instrument(skip(rapier_config))]

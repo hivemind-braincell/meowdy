@@ -6,7 +6,7 @@ use crate::{
     animation::Animation,
     assets::{Images, Sprites},
     control::{Controlled, Facing, Moves},
-    GameState,
+    GameState, Meowney,
 };
 
 #[derive(Component, Reflect, Clone, Debug, Default)]
@@ -202,10 +202,18 @@ pub fn setup(
 pub fn scene_transition(
     keyboard_input: Res<Input<KeyCode>>,
     mut app_state: ResMut<State<GameState>>,
+    meowney: Res<Meowney>,
 ) {
     if keyboard_input.pressed(KeyCode::Space) {
         info!("transitioning to post office scene");
         app_state.set(GameState::PostOffice).unwrap();
+    } else if keyboard_input.pressed(KeyCode::E) {
+        if meowney.0 >= 20 {
+            info!("transitioning to end scene");
+            app_state.set(GameState::End).unwrap();
+        } else {
+            warn!("player does not have enough meowney");
+        }
     }
 }
 
