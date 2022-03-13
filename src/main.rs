@@ -3,7 +3,7 @@
 #![allow(clippy::type_complexity)]
 
 use animation::Animation;
-use assets::{Images, Sprites};
+use assets::{Fonts, Images, Sprites};
 use bevy::{log::LogSettings, prelude::*};
 use bevy_asset_loader::AssetLoader;
 use bevy_inspector_egui::WorldInspectorPlugin;
@@ -61,6 +61,7 @@ fn main() {
         .continue_to_state(GameState::MainMenu)
         .with_collection::<Sprites>()
         .with_collection::<Images>()
+        .with_collection::<Fonts>()
         .build(&mut app);
 
     let log_level = if args.verbose { "debug" } else { "info" };

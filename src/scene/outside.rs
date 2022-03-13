@@ -4,7 +4,7 @@ use tracing::instrument;
 
 use crate::{
     animation::Animation,
-    assets::{Images, Sprites},
+    assets::{Fonts, Images, Sprites},
     control::{Controlled, Facing, Moves},
     GameState, Meowney,
 };
@@ -19,13 +19,21 @@ pub struct Scenery;
 #[derive(Component)]
 pub struct Collider;
 
-#[instrument(skip(commands, sprites, images, texture_atlases, rapier_config))]
+#[derive(Component)]
+pub struct MeowneyDisplay;
+
+#[derive(Component)]
+pub struct MeowneyError;
+
+#[instrument(skip(commands, sprites, images, fonts, texture_atlases, rapier_config))]
 pub fn setup(
     mut commands: Commands,
     sprites: Res<Sprites>,
     images: Res<Images>,
+    fonts: Res<Fonts>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     rapier_config: Res<RapierConfiguration>,
+    meowney: Res<Meowney>,
 ) {
     info!("setting up outside scene");
 
@@ -196,6 +204,54 @@ pub fn setup(
         .insert(ColliderDebugRender::default())
         .insert(Name::new("Right Collider"))
         .insert(Collider);
+
+    let font = fonts.vt323.clone();
+    commands.spawn_bundle(UiCameraBundle::default());
+
+    commands
+        .spawn_bundle(NodeBundle {
+            style: Style {
+                size: Size {
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
+                },
+                flex_direction: FlexDirection::ColumnReverse,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::SpaceEvenly,
+                ..Default::default()
+            },
+            visibility: Visibility {
+                is_visible: false,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .with_children(|parent| {
+            parent.spawn_bundle(TextBundle {
+                style: Style {
+                    size: Size {
+                        width: Val::Percent(100.),
+                        height: Val::Percent(100.),
+                    },
+                    ..Default::default()
+                },
+                text: Text::with_section(
+                    format!("Meowney: {}", meowney.0),
+                    TextStyle {
+                        font,
+                        font_size: 36.0,
+                        color: Color::BLUE,
+                    },
+                    TextAlignment {
+                        vertical: VerticalAlign::Top,
+                        horizontal: HorizontalAlign::Right,
+                    },
+                ),
+                ..Default::default()
+            });
+        })
+        .insert(Name::new("Meowney Display"))
+        .insert(MeowneyDisplay);
 }
 
 #[instrument(skip(keyboard_input, app_state))]
@@ -217,15 +273,17 @@ pub fn scene_transition(
     }
 }
 
-#[instrument(skip(commands, player, scenery, colliders))]
+#[instrument(skip(commands, player, scenery, colliders, meowney_display))]
 pub fn teardown(
     mut commands: Commands,
     player: Query<Entity, With<Player>>,
     scenery: Query<Entity, With<Scenery>>,
     colliders: Query<Entity, With<Collider>>,
+    meowney_display: Query<Entity, With<MeowneyDisplay>>,
 ) {
     info!("tearing down outside scene");
     player.for_each(|entity| commands.entity(entity).despawn_recursive());
     scenery.for_each(|entity| commands.entity(entity).despawn_recursive());
     colliders.for_each(|entity| commands.entity(entity).despawn_recursive());
+    meowney_display.for_each(|entity| commands.entity(entity).despawn_recursive());
 }

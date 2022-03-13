@@ -30,3 +30,9 @@ pub struct Images {
     #[asset(path = "images/meowdyend2.png")]
     pub end_2: Handle<Image>,
 }
+
+#[derive(AssetCollection)]
+pub struct Fonts {
+    #[asset(path = "fonts/VT323-Regular.ttf")]
+    pub vt323: Handle<Font>,
+}
