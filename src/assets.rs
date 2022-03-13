@@ -17,4 +17,10 @@ pub struct Sprites {
 pub struct Images {
     #[asset(path = "images/buildings.png")]
     pub buildings: Handle<Image>,
+    #[asset(path = "images/head.png")]
+    pub head: Handle<Image>,
+    #[asset(path = "images/tail.png")]
+    pub tail: Handle<Image>,
+    #[asset(path = "images/letter.png")]
+    pub letter: Handle<Image>,
 }

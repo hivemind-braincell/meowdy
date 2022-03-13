@@ -2090,6 +2090,7 @@ dependencies = [
  "bevy_asset_loader",
  "bevy_rapier2d",
  "clap",
+ "rand",
  "tracing",
 ]
 
