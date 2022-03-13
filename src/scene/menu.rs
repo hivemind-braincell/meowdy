@@ -52,10 +52,7 @@ pub fn setup(
                 justify_content: JustifyContent::SpaceEvenly,
                 ..Default::default()
             },
-            visibility: Visibility {
-                is_visible: false,
-                ..Default::default()
-            },
+            visibility: Visibility { is_visible: false },
             ..Default::default()
         })
         .insert(MainMenu)

@@ -60,6 +60,12 @@ jobs:
           ~/.cargo/git
           target
         key: lint-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+    - name: Install alsa
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev
+    - name: Install udev
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libudev-dev
+    - name: Install libxcb
+      run: sudo apt-get update; sudo apt-get install --no-install-recommends libxcb-shape0-dev libxcb-xfixes0-dev
     - name: Clippy
       uses: actions-rs/clippy-check@v1
       with:
