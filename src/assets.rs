@@ -23,6 +23,8 @@ pub struct Images {
     pub tail: Handle<Image>,
     #[asset(path = "images/letter.png")]
     pub letter: Handle<Image>,
+    #[asset(path = "images/snakebackground.png")]
+    pub snakebackground: Handle<Image>,
     #[asset(path = "images/meowdyend1.png")]
     pub end_1: Handle<Image>,
     #[asset(path = "images/meowdyend2.png")]

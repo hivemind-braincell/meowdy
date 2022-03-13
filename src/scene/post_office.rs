@@ -55,6 +55,9 @@ pub struct SpawnFood;
 
 pub struct SnakeGameOver;
 
+#[derive(Component, Clone, Copy, PartialEq, Eq)]
+pub struct Background;
+
 #[instrument(skip(commands, images, segments, spawn_writer))]
 pub fn setup(
     mut commands: Commands,
@@ -65,6 +68,16 @@ pub fn setup(
     info!("setting up post office scene");
 
     commands.insert_resource(MoveTimer(Timer::from_seconds(0.2, true)));
+
+    commands
+        .spawn()
+        .insert_bundle(SpriteBundle {
+            transform: Transform::from_translation(Vec3::new(0., 0., 0.)),
+            texture: images.snakebackground.clone(),
+            ..Default::default()
+        })
+        .insert(Name::new("Snake Background"))
+        .insert(Background);
 
     segments.0 = vec![
         commands
@@ -77,6 +90,7 @@ pub fn setup(
             .insert(Position { x: 3, y: 2 })
             .insert_bundle(SpriteBundle {
                 texture: images.head.clone(),
+                transform: Transform::from_translation(Vec3::new(0., 0., 2.)),
                 ..Default::default()
             })
             .id(),
@@ -166,6 +180,7 @@ fn spawn_segment(mut commands: Commands, position: Position, images: Res<Images>
     commands
         .spawn_bundle(SpriteBundle {
             texture: images.tail.clone(),
+            transform: Transform::from_translation(Vec3::new(0., 0., 2.)),
             ..Default::default()
         })
         .insert(SnakeSegment)
@@ -230,6 +245,7 @@ pub fn food_spawner(
         commands
             .spawn_bundle(SpriteBundle {
                 texture: images.letter.clone(),
+                transform: Transform::from_translation(Vec3::new(0., 0., 1.)),
                 ..Default::default()
             })
             .insert(Food)
@@ -241,7 +257,11 @@ pub fn position_translation(mut q: Query<(&Position, &mut Transform)>) {
     let scale = 24.;
 
     for (pos, mut transform) in q.iter_mut() {
-        transform.translation = Vec3::new(pos.x as f32 * scale, pos.y as f32 * scale, 0.);
+        transform.translation = Vec3::new(
+            pos.x as f32 * scale,
+            pos.y as f32 * scale,
+            transform.translation.z,
+        );
     }
 }
 
@@ -250,6 +270,7 @@ pub fn game_over(
     mut reader: EventReader<SnakeGameOver>,
     food: Query<Entity, With<Food>>,
     segments: Query<Entity, With<SnakeSegment>>,
+    background: Query<Entity, With<Background>>,
     mut app_state: ResMut<State<GameState>>,
     mut meowney: ResMut<Meowney>,
 ) {
@@ -264,6 +285,9 @@ pub fn game_over(
         }
         earned -= 2;
         meowney.0 += earned;
+
+        let background = background.single();
+        commands.entity(background).despawn();
 
         info!(meowney = %meowney.0, "meowney updated");
 
