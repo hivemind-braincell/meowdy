@@ -4,11 +4,12 @@
 
 use animation::Animation;
 use assets::{Images, Sprites};
-use bevy::{core::FixedTimestep, log::LogSettings, prelude::*};
+use bevy::{log::LogSettings, prelude::*};
 use bevy_asset_loader::AssetLoader;
 use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_rapier2d::prelude::*;
 use clap::Parser;
+use scene::post_office::{LastTailPosition, SnakeGameOver, SnakeGrowth, SnakeSegments, SpawnFood};
 use tracing::instrument;
 
 mod animation;
@@ -40,9 +41,15 @@ enum Label {
     ReadInput,
     ApplyInput,
     Move,
+    Eat,
+    Grow,
+    SpawnFood,
     PrepareAnimation,
     Animate,
 }
+
+#[derive(Default, Debug)]
+pub struct Meowney(pub u32);
 
 fn main() {
     let args = Args::parse();
@@ -69,6 +76,12 @@ fn main() {
         filter,
         ..Default::default()
     })
+    .insert_resource(SnakeSegments::default())
+    .insert_resource(LastTailPosition::default())
+    .insert_resource(Meowney::default())
+    .add_event::<SnakeGrowth>()
+    .add_event::<SpawnFood>()
+    .add_event::<SnakeGameOver>()
     .add_plugins(DefaultPlugins)
     .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
     .add_state(GameState::AssetLoading)
@@ -88,34 +101,33 @@ fn main() {
     )
     .add_system_set(
         SystemSet::on_update(GameState::Outside)
-            .with_system(control::read_control_input)
-            .with_system(scene::outside::scene_transition)
-            .label(Label::ReadInput),
-    )
-    .add_system_set(
-        SystemSet::on_update(GameState::Outside)
-            .after(Label::ReadInput)
-            .with_system(control::update_facing)
-            .label(Label::ApplyInput),
-    )
-    .add_system_set(
-        SystemSet::on_update(GameState::Outside)
-            .after(Label::ReadInput)
-            .with_system(control::move_controlled)
-            .label(Label::Move),
-    )
-    .add_system_set(
-        SystemSet::on_update(GameState::Outside)
-            .after(Label::ApplyInput)
-            .with_system(animation::start_stop_player_animation)
-            .with_system(animation::update_player_animation)
-            .label(Label::PrepareAnimation),
-    )
-    .add_system_set(
-        SystemSet::on_update(GameState::Outside)
-            .after(Label::PrepareAnimation)
-            .with_system(animation::animate)
-            .label(Label::Animate),
+            .with_system(control::read_control_input.label(Label::ReadInput))
+            .with_system(scene::outside::scene_transition.label(Label::ReadInput))
+            .with_system(
+                control::update_facing
+                    .after(Label::ReadInput)
+                    .label(Label::ApplyInput),
+            )
+            .with_system(
+                control::move_controlled
+                    .after(Label::ApplyInput)
+                    .label(Label::Move),
+            )
+            .with_system(
+                animation::start_stop_player_animation
+                    .after(Label::ApplyInput)
+                    .label(Label::PrepareAnimation),
+            )
+            .with_system(
+                animation::update_player_animation
+                    .after(Label::ApplyInput)
+                    .label(Label::PrepareAnimation),
+            )
+            .with_system(
+                animation::animate
+                    .after(Label::PrepareAnimation)
+                    .label(Label::Animate),
+            ),
     )
     .add_system_set(SystemSet::on_exit(GameState::Outside).with_system(scene::outside::teardown))
     .add_system_set(
@@ -125,31 +137,35 @@ fn main() {
     )
     .add_system_set(
         SystemSet::on_update(GameState::PostOffice)
-            .with_system(control::read_control_input)
-            .label(Label::ReadInput),
+            .with_system(scene::post_office::update_head_direction.label(Label::ApplyInput)),
     )
     .add_system_set(
         SystemSet::on_update(GameState::PostOffice)
-            .after(Label::ReadInput)
-            .with_run_criteria(FixedTimestep::step(0.150))
-            .with_system(scene::post_office::update_head_direction)
-            .label(Label::ApplyInput),
+            .with_system(
+                scene::post_office::move_snake
+                    .after(Label::ApplyInput)
+                    .label(Label::Move),
+            )
+            .with_system(
+                scene::post_office::snake_eating
+                    .label(Label::Eat)
+                    .after(Label::Move),
+            )
+            .with_system(
+                scene::post_office::snake_growth
+                    .label(Label::Grow)
+                    .after(Label::Eat),
+            )
+            .with_system(
+                scene::post_office::food_spawner
+                    .label(Label::SpawnFood)
+                    .after(Label::Grow),
+            )
+            .with_system(scene::post_office::game_over.after(Label::SpawnFood)),
     )
-    .add_system_set(
-        SystemSet::on_update(GameState::PostOffice)
-            .after(Label::ApplyInput)
-            .with_run_criteria(FixedTimestep::step(0.150))
-            .with_system(scene::post_office::move_snake)
-            .label(Label::Move),
-    )
-    .add_system_set(
-        SystemSet::on_update(GameState::PostOffice)
-            .after(Label::Move)
-            .with_system(scene::post_office::position_translation)
-            .label(Label::PrepareAnimation),
-    )
-    .add_system_set(
-        SystemSet::on_exit(GameState::PostOffice).with_system(scene::post_office::teardown),
+    .add_system_set_to_stage(
+        CoreStage::PostUpdate,
+        SystemSet::new().with_system(scene::post_office::position_translation),
     )
     .register_type::<Animation>();
 
